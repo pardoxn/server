@@ -3,7 +3,7 @@ export function installPublicGeocode(app) {
   app.get('/api/geocode', async (req, res) => {
     try {
       const q = String(req.query.q || '').trim();
-      if (!q) return res.status(400).json({ ok: false, error: 'missing_q' });
+      if (!q) return res.status(400).json({ error: 'missing_q' });
 
       const u = new URL('https://nominatim.openstreetmap.org/search');
       u.searchParams.set('q', q);
@@ -13,14 +13,14 @@ export function installPublicGeocode(app) {
       u.searchParams.set('email', 'navio.local@invalid');
 
       const r = await fetch(u.toString(), { headers: { 'User-Agent': UA } });
-      if (!r.ok) return res.status(502).json({ ok: false, error: 'nominatim_'+r.status });
-      const arr = await r.json().catch(() => null);
-      if (!Array.isArray(arr) || !arr.length) return res.status(404).json({ ok: false, error: 'not_found' });
+      if (!r.ok) return res.status(502).json({ error: 'nominatim_'+r.status });
 
-      const { lat, lon } = arr[0];
-      res.json({ ok: true, lat: Number(lat), lon: Number(lon) });
+      const arr = await r.json().catch(() => null);
+      if (!Array.isArray(arr)) return res.status(500).json({ error: 'bad_json' });
+
+      res.json(arr);
     } catch (e) {
-      res.status(500).json({ ok: false, error: String(e && e.message || e) });
+      res.status(500).json({ error: String(e && e.message || e) });
     }
   });
 }
