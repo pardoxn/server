@@ -5,6 +5,8 @@ const { randomUUID } = require('node:crypto');
 const cloudinary = require('cloudinary').v2;
 
 const app = express();
+const installPublicGeocode = require('./geocode_public.cjs');
+installPublicGeocode(app);
 import { installPublicGeocode } from "./geocode_public_patch.mjs";
 installPublicGeocode(app);
 const PORT = process.env.PORT || 8787;
